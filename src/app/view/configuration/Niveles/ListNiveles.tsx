@@ -18,52 +18,21 @@ import type { Nivel } from '@/app/services/interface/Nivel'
 import { getLista } from '@/app/services/configurations/nivelServices'
 
 const columns = [
+
+
+  { data: 'id' },
+  { data: 'nombre' },
+  // { data: 'estado' },
   {
-    data: null,
-    orderable: false,
-    className: 'select-checkbox text-start',
-    render: function () {
-      return ''
-    },
-  },
-  { data: 'company' },
-  { data: 'symbol' },
-  {
-    data: 'price',
+    data: 'estado',
     render: (data: number) => {
-      return `${currency}${data}`
-    },
-    className: 'text-start',
-  },
-  {
-    data: 'change',
-    render: (data: number) => {
-      return `${data}%`
-    },
-    className: 'text-start',
-  },
-  { data: 'volume', className: 'text-start' },
-  {
-    data: 'marketCap',
-    render: (data: string) => {
-      return `${currency}${data}`
+      const badgeClass = data === 1 ? 'success' : 'danger'
+      const textEstado = data === 1 ? 'Activo' : 'Inactivo'
+      return `<span class="badge badge-label badge-soft-${badgeClass}">${textEstado}</span>`
     },
   },
   {
-    data: 'rating',
-    render: (data: number) => {
-      return `${data}★`
-    },
-  },
-  // {
-  //   data: 'status',
-  //   render: (data: string) => {
-  //     const badgeClass = data === 'Bullish' ? 'success' : 'danger'
-  //     return `<span class="badge badge-label badge-soft-${badgeClass}">${data}</span>`
-  //   },
-  // },
-  {
-    data: 'status',
+    data: 'id',
     render: (data: string, row: any) => {
       const badgeClass = data === 'Bullish' ? 'success' : 'danger'
       const buttonHtml = ReactDOMServer.renderToStaticMarkup(
@@ -78,8 +47,9 @@ const columns = [
         
       )
       // Combina el badge HTML existente con el nuevo botón HTML
-      return `<span class="badge badge-label badge-soft-${badgeClass}">${data}</span> ${buttonHtml}`
+      return `${buttonHtml}`
     },
+    className: 'text-start',
   },
 ]
 
@@ -87,27 +57,8 @@ const Example = () => {
   DataTable.use(DT)
   const tableRef = useRef<DataTableRef | null>(null)
 
-  const selectAllRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
-    if (tableRef.current && selectAllRef.current) {
-      selectAllRef.current.addEventListener('change', () => {
-        if (selectAllRef.current?.checked) {
-          tableRef.current?.dt()?.rows({ search: 'applied' }).select()
-        } else {
-          tableRef.current?.dt()?.rows().deselect()
-        }
-      })
-
-      tableRef.current?.dt()?.on('select deselect', function () {
-        const totalRows = tableRef.current?.dt()?.rows({ search: 'applied' }).count()
-        const selectedRows = tableRef.current?.dt()?.rows({ selected: true, search: 'applied' }).count()
-        if (selectAllRef.current) {
-          selectAllRef.current.checked = selectedRows === totalRows
-        }
-      })
-    }
-
     
     const container = tableRef.current?.dt()?.table().container();
     const handleTableClick = (event: MouseEvent) => {
@@ -167,26 +118,14 @@ const Example = () => {
       fetchLista();
     }, []);
   return (
-    <ComponentCard title="Example">
+    <ComponentCard title="Lista de Niveles">
       <DataTable
         ref={tableRef}
-        data={tableData.body}
+        data={niveles}
         columns={columns}
         options={{
-          select: {
-            style: 'multi',
-            selector: 'td:first-child',
-            className: 'selected',
-          },
           order: [[1, 'asc']],
           responsive: true,
-          columnDefs: [
-            {
-              orderable: false,
-              render: DT.render.select(),
-              targets: 0,
-            },
-          ],
           language: {
             paginate: {
               first: ReactDOMServer.renderToStaticMarkup(<TbChevronsLeft className="fs-lg" />),
@@ -199,13 +138,10 @@ const Example = () => {
         className="table table-striped dt-responsive dt-select-checkbox align-middle mb-0">
         <thead className="thead-sm text-uppercase fs-xxs">
           <tr>
-            <th className="fs-sm">
-              <input ref={selectAllRef} type="checkbox" className="form-check-input" />
-            </th>
-            <th>Company</th>
-            <th>Symbol</th>
-            <th>Change</th>
-            <th>Status</th>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Estado</th>
+            <th>Acción</th>
           </tr>
         </thead>
       </DataTable>
