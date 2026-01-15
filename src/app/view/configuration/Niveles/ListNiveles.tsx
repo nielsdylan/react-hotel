@@ -210,6 +210,16 @@ const CardTable = () => {
               next: ReactDOMServer.renderToStaticMarkup(<TbChevronRight className="fs-lg" />),
               last: ReactDOMServer.renderToStaticMarkup(<TbChevronsRight className="fs-lg" />),
             },
+            processing: "Procesando...",
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ registros",
+            info: "Mostrando de _START_ a _END_ de _TOTAL_ registros",
+            infoEmpty: "Mostrando 0 a 0 de 0 registros",
+            infoFiltered: "(filtrado de un total de _MAX_ registros)",
+            infoPostFix: "",
+            loadingRecords: "Cargando...",
+            zeroRecords: "No se encontraron resultados",
+            emptyTable: "Ningún dato disponible en esta tabla"
           },
         }}
         className="table table-striped dt-responsive dt-select-checkbox align-middle mb-0">
