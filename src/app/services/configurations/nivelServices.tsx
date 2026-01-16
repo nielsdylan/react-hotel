@@ -8,7 +8,7 @@ const token = localStorage.getItem(TOKEN_KEY);
 // Exporta cada función de forma individual.
 export const getLista = async () => {
   try {
-    const response = await axios.get(API_URL + "/hotel/niveles/lista", {
+    const response = await axios.get(API_URL + "/hotel/configuracion/niveles/lista", {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       },
@@ -22,7 +22,7 @@ export const getLista = async () => {
 };
 export const getFind = async (id:number) => {
   try {
-    const response = await axios.get(API_URL + "/hotel/niveles/ver/" + id, {
+    const response = await axios.get(API_URL + "/hotel/configuracion/niveles/ver/" + id, {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       },
@@ -36,7 +36,7 @@ export const getFind = async (id:number) => {
 };
 export const postGuardar = async (data: { nombre: string, id:number }) => {
   try {
-    const response = await axios.post(API_URL + "/hotel/niveles/guardar",data,  {
+    const response = await axios.post(API_URL + "/hotel/configuracion/niveles/guardar",data,  {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       },
@@ -50,7 +50,7 @@ export const postGuardar = async (data: { nombre: string, id:number }) => {
 };
 export const deletRegister = async (data: { id:number }) => {
   try {
-    const response = await axios.post(API_URL + "/hotel/niveles/eliminar",data,  {
+    const response = await axios.post(API_URL + "/hotel/configuracion/niveles/eliminar",data,  {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       },
