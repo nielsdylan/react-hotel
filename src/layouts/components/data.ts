@@ -125,6 +125,7 @@ export const menuItems: MenuItemType[] = [
     icon: LuPanelTop,
     children: [
       { key: 'dark-topbar', label: 'Clientes', url: '/configuracion/clientes' },
+      { key: 'dark-topbar', label: 'Habitaciones', url: '/configuracion/habitaciones' },
       { key: 'dark-topbar', label: 'Categorías', url: '/configuracion/categorias' },
       { key: 'dark-topbar', label: 'Niveles', url: '/configuracion/niveles' },
       { key: 'dark-topbar', label: 'Tarifas', url: '/configuracion/tarifas' },

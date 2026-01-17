@@ -1,4 +1,3 @@
-
 import ComponentCard from '@/components/cards/ComponentCard'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
 import { Button, Col, Container, FormControl, FormLabel, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
@@ -11,19 +10,15 @@ import 'datatables.net-select'
 import ReactDOMServer from 'react-dom/server'
 import { TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight, TbEdit, TbPlus, TbTrash } from 'react-icons/tb'
 
-import { tableData } from '@/views/tables/data-tables/data'
-import { currency } from '@/helpers'
 import { useEffect, useRef, useState } from 'react'
-import type { Nivel } from '@/app/services/interface/Nivel'
-import { deletRegister, getFind, getLista, postGuardar } from '@/app/services/configurations/nivelServices'
 import useToggle from '@/hooks/useToggle'
 import { sweet } from '@/utils/alerts'
 import { LuSave } from 'react-icons/lu'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { createRoot } from 'react-dom/client'
-
-
+import { deletRegister, getFind, getLista, postGuardar } from '@/app/services/configurations/tarifaService'
+import type { Tarifa } from '@/app/services/interface/Tarifa'
 
 const CardTable = () => {
   const columns = [
@@ -46,7 +41,7 @@ const CardTable = () => {
         // Devolvemos un contenedor vacío donde React "aterrizará"
         return `<div class="react-action-buttons" data-id="${data}"></div>`;
       },
-      createdCell: (cell: Node, cellData: any, rowData: any) => {
+      createdCell: (cell: Node,  rowData: any) => {
         // Aquí montamos el componente de React-Bootstrap en la celda recién creada
         const root = createRoot(cell as HTMLElement);
         root.render(
@@ -85,7 +80,7 @@ const CardTable = () => {
   DataTable.use(DT)
   const tableRef = useRef<DataTableRef | null>(null)
 
-  const [niveles, setNiveles] = useState<Nivel[]>([]); // donde se guarda el json que se trae del backend
+  const [dataJson, setDataJson] = useState<Tarifa[]>([]); // donde se guarda el json que se trae del backend
   const { isTrue: isOpen, toggle: toggleModal } = useToggle(); // variable para abrir y cerrar el modal
   // json que creramos para guardar variables del formulario
   const [formData, setFormData] = useState({
@@ -96,8 +91,8 @@ const CardTable = () => {
   const [textModal, setTextModal] = useState("");
   const fetchLista = async () => {
     try {
-      const respons: { data: Nivel[] } = await getLista();
-      setNiveles(respons.data);      
+      const respons: { data: Tarifa[] } = await getLista();
+      setDataJson(respons.data);      
     } catch (error) {
       console.log(error);
     } finally {
@@ -113,13 +108,13 @@ const CardTable = () => {
 
   // FUNCION QUE TRAE INFORMACIONDE BAKEND PARA EDITAR-------------
   const handleEdit = async (id: number) => {
-    const respons: Nivel = await getFind(id);
+    const respons: Tarifa = await getFind(id);
 
     setFormData({
       nombre: respons.nombre, // Asegúrate de que 'nombre' exista en el objeto Nivel
       id: respons.id, // Asegúrate de que 'nombre' exista en el objeto Nivel
     });
-    setTextModal("Editar Nivel")
+    setTextModal("Editar Tarifa")
     
     toggleModal();
   };
@@ -153,7 +148,7 @@ const CardTable = () => {
       nombre: "", // Asegúrate de que 'nombre' exista en el objeto Nivel
       id: id, // Asegúrate de que 'nombre' exista en el objeto Nivel
     });
-    setTextModal("Nuevo Nivel")
+    setTextModal("Nueva Tarifa")
     toggleModal();
   };
   // --------------------------------------------
@@ -191,14 +186,14 @@ const CardTable = () => {
   // --------------------------------------------
 
   return (
-    <ComponentCard title="Lista de Niveles">
+    <ComponentCard title="Lista de Habitaciones">
       <Button variant="secondary" className="mb-3 btn-sm" onClick={() => handleNew(0) }>
         <TbPlus className="fs-lg" /> 
         Nuevo
       </Button>
       <DataTable
         ref={tableRef}
-        data={niveles}
+        data={dataJson}
         columns={columns}
         options={{
           order: [[1, 'asc']],
@@ -277,11 +272,10 @@ const CardTable = () => {
   )
 }
 
-const ListNiveles = () => {
-  
+const ListaHabitaciones = () => {
   return (
     <Container fluid>
-      <PageBreadcrumb title="Gestion de Niveles" subtitle="Configuración" />
+      <PageBreadcrumb title="Gestion de Habitaciones" subtitle="Configuración" />
 
       <Row className="justify-content-center">
         <Col xxl={8}>
@@ -292,4 +286,4 @@ const ListNiveles = () => {
   )
 }
 
-export default ListNiveles
+export default ListaHabitaciones

@@ -4,6 +4,9 @@ import {Navigate, type RouteObject} from 'react-router'
 import MainLayout from '@/layouts/MainLayout.tsx'
 import PrivateRoute from '@/app/services/PrivateRoute'
 import PublicRoute from '@/app/services/PublicRoute'
+import ListaCategoria from '@/app/view/configuration/categoria/ListaCategoria'
+import ListaTarifas from '@/app/view/configuration/tarifas/ListaTarifas'
+import ListaHabitaciones from '../app/view/configuration/habitaciones/ListaHabitaciones';
 
 // -------------
 // RUTAS DE LOS COMPONENTES --------------------------
@@ -40,9 +43,10 @@ const dashboardRoutes: RouteObject[] = [
         path: '/configuracion',
         children: [
             { path: 'clientes', element: <ListClient /> },
-            { path: 'categorias', element: <ListClient /> },
+            { path: 'habitaciones', element: <ListaHabitaciones /> },
+            { path: 'categorias', element: <ListaCategoria /> },
             { path: 'niveles', element: <ListNiveles /> },
-            { path: 'tarifas', element: <ListClient /> },
+            { path: 'tarifas', element: <ListaTarifas /> },
         ],
     },
 ]

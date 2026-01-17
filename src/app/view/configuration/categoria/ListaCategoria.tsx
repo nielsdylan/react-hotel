@@ -11,18 +11,15 @@ import 'datatables.net-select'
 import ReactDOMServer from 'react-dom/server'
 import { TbChevronLeft, TbChevronRight, TbChevronsLeft, TbChevronsRight, TbEdit, TbPlus, TbTrash } from 'react-icons/tb'
 
-import { tableData } from '@/views/tables/data-tables/data'
-import { currency } from '@/helpers'
 import { useEffect, useRef, useState } from 'react'
-import type { Nivel } from '@/app/services/interface/Nivel'
-import { deletRegister, getFind, getLista, postGuardar } from '@/app/services/configurations/nivelServices'
 import useToggle from '@/hooks/useToggle'
 import { sweet } from '@/utils/alerts'
 import { LuSave } from 'react-icons/lu'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { createRoot } from 'react-dom/client'
-
+import type { Categoria } from '@/app/services/interface/Categorias'
+import { deletRegister, getFind, getLista, postGuardar } from '@/app/services/configurations/categoriaServices'
 
 
 const CardTable = () => {
@@ -85,7 +82,7 @@ const CardTable = () => {
   DataTable.use(DT)
   const tableRef = useRef<DataTableRef | null>(null)
 
-  const [niveles, setNiveles] = useState<Nivel[]>([]); // donde se guarda el json que se trae del backend
+  const [niveles, setNiveles] = useState<Categoria[]>([]); // donde se guarda el json que se trae del backend
   const { isTrue: isOpen, toggle: toggleModal } = useToggle(); // variable para abrir y cerrar el modal
   // json que creramos para guardar variables del formulario
   const [formData, setFormData] = useState({
@@ -96,7 +93,7 @@ const CardTable = () => {
   const [textModal, setTextModal] = useState("");
   const fetchLista = async () => {
     try {
-      const respons: { data: Nivel[] } = await getLista();
+      const respons: { data: Categoria[] } = await getLista();
       setNiveles(respons.data);      
     } catch (error) {
       console.log(error);
@@ -113,7 +110,7 @@ const CardTable = () => {
 
   // FUNCION QUE TRAE INFORMACIONDE BAKEND PARA EDITAR-------------
   const handleEdit = async (id: number) => {
-    const respons: Nivel = await getFind(id);
+    const respons: Categoria = await getFind(id);
 
     setFormData({
       nombre: respons.nombre, // Asegúrate de que 'nombre' exista en el objeto Nivel
@@ -191,7 +188,7 @@ const CardTable = () => {
   // --------------------------------------------
 
   return (
-    <ComponentCard title="Lista de Niveles">
+    <ComponentCard title="Lista de Categorias">
       <Button variant="secondary" className="mb-3 btn-sm" onClick={() => handleNew(0) }>
         <TbPlus className="fs-lg" /> 
         Nuevo
@@ -277,11 +274,10 @@ const CardTable = () => {
   )
 }
 
-const ListNiveles = () => {
-  
+const ListaCategoria = () => {
   return (
     <Container fluid>
-      <PageBreadcrumb title="Gestion de Niveles" subtitle="Configuración" />
+      <PageBreadcrumb title="Gestion de Categorias" subtitle="Configuración" />
 
       <Row className="justify-content-center">
         <Col xxl={8}>
@@ -292,4 +288,4 @@ const ListNiveles = () => {
   )
 }
 
-export default ListNiveles
+export default ListaCategoria
