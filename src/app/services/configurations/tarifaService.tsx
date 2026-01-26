@@ -19,6 +19,20 @@ export const getLista = async () => {
     throw error;
   }
 };
+export const getListaPaginate = async (page:number) => {
+  try {
+    const response = await axios.get(API_URL + "/hotel/configuracion/tarifas/lista?page="+page, {
+      headers: {
+        Authorization: `Bearer ${token}`, // Send the token in the Authorization header
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    throw error;
+  }
+};
 export const getFind = async (id:number) => {
   try {
     const response = await axios.get(API_URL + "/hotel/configuracion/tarifas/ver/" + id, {

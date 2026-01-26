@@ -17,8 +17,9 @@ import { LuSave } from 'react-icons/lu'
 import withReactContent from 'sweetalert2-react-content'
 import Swal from 'sweetalert2'
 import { createRoot } from 'react-dom/client'
-import { deletRegister, getFind, getLista, postGuardar } from '@/app/services/configurations/tarifaService'
+import { deletRegister, getFind, getLista, getListaPaginate, postGuardar } from '@/app/services/configurations/tarifaService'
 import type { Tarifa } from '@/app/services/interface/Tarifa'
+import type { Paginate } from '@/app/services/interface/BackEndPaginate'
 
 const CardTable = () => {
   const columns = [
@@ -87,12 +88,23 @@ const CardTable = () => {
     nombre: "",
     id: 0,
   });
-  // --------------------------------------------
+  // ------- Control del estado de pagionas------------------------------------- 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [lastPage, setLastPage] = useState(1);
+  const [totalRecords, setTotalRecords] = useState(0);
+  // -------------------------------------------------
   const [textModal, setTextModal] = useState("");
-  const fetchLista = async () => {
+  const fetchLista = async (page = 1) => {
     try {
-      const respons: { data: Tarifa[] } = await getLista();
-      setDataJson(respons.data);      
+      // const respons: { data: Tarifa[] } = await getLista();
+      const respons: { data: Paginate[] } = await getListaPaginate(page);
+      // setDataJson(respons.data);  
+      console.log(respons.data);
+      
+      setDataJson(respons.data); // Laravel devuelve los registros en .data
+      setCurrentPage(respons.current_page);
+      setLastPage(respons.last_page);
+      setTotalRecords(respons.total);
     } catch (error) {
       console.log(error);
     } finally {
@@ -101,9 +113,10 @@ const CardTable = () => {
   };
   // Funcion que se carga al inciar la vista----
   useEffect(() => {
-    fetchLista(); // hace llamado al api para qeu se use con los otros componentes
+    // fetchLista(); // hace llamado al api para qeu se use con los otros componentes
+    fetchLista(currentPage);
     
-  }, []);
+  }, [currentPage]);
   // ------------------
 
   // FUNCION QUE TRAE INFORMACIONDE BAKEND PARA EDITAR-------------
@@ -123,7 +136,7 @@ const CardTable = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // Evita que se recargue la página
     const respons = await postGuardar(formData);
-    fetchLista();
+    fetchLista(currentPage);
     toggleModal();
     sweet({
       title: respons.titulo,
@@ -173,7 +186,7 @@ const CardTable = () => {
           id: id
         };
         const respons = await deletRegister(data);
-        fetchLista();
+        fetchLista(currentPage);
         sweet({
           title: respons.titulo,
           text: respons.mensaje,
@@ -196,9 +209,12 @@ const CardTable = () => {
         data={dataJson}
         columns={columns}
         options={{
+          paging: false, // Desactivamos la paginación interna de DataTables
+          info: false,   // Ocultamos la info interna para usar la nuestra
           order: [[1, 'asc']],
           responsive: true,
           language: {
+            
             paginate: {
               first: ReactDOMServer.renderToStaticMarkup(<TbChevronsLeft className="fs-lg" />),
               previous: ReactDOMServer.renderToStaticMarkup(<TbChevronLeft className="fs-lg" />),
@@ -227,6 +243,33 @@ const CardTable = () => {
           </tr>
         </thead>
       </DataTable>
+      {/* Controles de Paginación Personalizados (Estilo Bootstrap) */}
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          Mostrando página {currentPage} de {lastPage} (Total: {totalRecords} registros)
+        </div>
+        <div className="btn-group">
+          <Button 
+            variant="outline-primary" 
+            size="sm" 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            <TbChevronLeft className="fs-lg" />
+            {/* Anterior */}
+          </Button>
+          <Button 
+            variant="outline-primary" 
+            size="sm" 
+            disabled={currentPage === lastPage}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            <TbChevronRight className="fs-lg" />
+            {/* Siguiente */}
+          </Button>
+        </div>
+      </div>
+
       <Modal
         className="fade"
         show={isOpen}
