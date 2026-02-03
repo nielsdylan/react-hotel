@@ -19,9 +19,9 @@ export const getLista = async () => {
     throw error;
   }
 };
-export const getListaPaginate = async (page:number) => {
+export const getListaPaginate = async (page:number, limit:number) => {
   try {
-    const response = await axios.get(API_URL + "/hotel/configuracion/tarifas/lista?page="+page, {
+    const response = await axios.get(API_URL + "/hotel/configuracion/tarifas/lista?page="+page+"&limit="+limit, {
       headers: {
         Authorization: `Bearer ${token}`, // Send the token in the Authorization header
       },

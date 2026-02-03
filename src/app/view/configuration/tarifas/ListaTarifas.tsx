@@ -1,6 +1,6 @@
 import ComponentCard from '@/components/cards/ComponentCard'
 import PageBreadcrumb from '@/components/PageBreadcrumb'
-import { Button, Col, Container, FormControl, FormLabel, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, OverlayTrigger, Row, Tooltip } from 'react-bootstrap'
+import { Button, Col, Container, FormControl, FormLabel, Modal, ModalBody, ModalFooter, ModalHeader, ModalTitle, OverlayTrigger, Pagination, Row, Tooltip } from 'react-bootstrap'
 
 import DT from 'datatables.net-bs5'
 import DataTable, {type  DataTableRef } from 'datatables.net-react'
@@ -78,8 +78,6 @@ const CardTable = () => {
     className: 'text-center align-middle',
     }
   ]
-  DataTable.use(DT)
-  const tableRef = useRef<DataTableRef | null>(null)
 
   const [dataJson, setDataJson] = useState<Tarifa[]>([]); // donde se guarda el json que se trae del backend
   const { isTrue: isOpen, toggle: toggleModal } = useToggle(); // variable para abrir y cerrar el modal
@@ -92,19 +90,30 @@ const CardTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [lastPage, setLastPage] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
+
+  const [firstPageUrl, setfirstPageUrl] = useState('');
+  const [lastPageUrl, setlastPageUrl] = useState('');
+  const [links, setLinks] = useState<any[]>([]);
+  const [perPage, setPerPage] = useState(5);
   // -------------------------------------------------
   const [textModal, setTextModal] = useState("");
-  const fetchLista = async (page = 1) => {
+  const fetchLista = async (page = 1, limit = perPage) => {
     try {
       // const respons: { data: Tarifa[] } = await getLista();
-      const respons: { data: Paginate[] } = await getListaPaginate(page);
+      // const respons: { data: Paginate[] } = await getListaPaginate(page);
+      const respons: Paginate = await getListaPaginate(page, limit);
       // setDataJson(respons.data);  
       console.log(respons.data);
+      console.log(respons);
       
       setDataJson(respons.data); // Laravel devuelve los registros en .data
       setCurrentPage(respons.current_page);
       setLastPage(respons.last_page);
       setTotalRecords(respons.total);
+
+      setfirstPageUrl(respons.first_page_url);
+      setlastPageUrl(respons.last_page_url);
+      setLinks(respons.links);
     } catch (error) {
       console.log(error);
     } finally {
@@ -112,13 +121,44 @@ const CardTable = () => {
     }
   };
   // Funcion que se carga al inciar la vista----
-  useEffect(() => {
-    // fetchLista(); // hace llamado al api para qeu se use con los otros componentes
-    fetchLista(currentPage);
-    
-  }, [currentPage]);
-  // ------------------
+  DataTable.use(DT)
 
+  const tableRef = useRef<DataTableRef | null>(null)
+  useEffect(() => {
+    
+    // fetchLista(); // hace llamado al api para qeu se use con los otros componentes
+    fetchLista(currentPage, perPage);
+    if (tableRef.current && tableRef.current.dt) {
+      const tableApi = tableRef.current?.dt() as any;
+
+      // Escuchamos el evento 'length' que se dispara al cambiar el selector
+      if (tableApi) {
+        tableApi.on('length.dt', (_e: any, _settings: any, len: number) => {
+          console.log("Cambiando a:", len);
+          setPerPage(len);
+          setCurrentPage(1);
+        });
+      }
+
+      // Limpieza al desmontar el componente
+      return () => {
+        tableApi.off('length.dt');
+      };
+    }
+    // fetchLista(currentPage);
+  }, [currentPage, perPage]);
+  // ------------------
+  const goToFirstPage = () => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  };
+
+  const goToLastPage = () => {
+    if (currentPage !== lastPage) {
+      setCurrentPage(lastPage);
+    }
+  };
   // FUNCION QUE TRAE INFORMACIONDE BAKEND PARA EDITAR-------------
   const handleEdit = async (id: number) => {
     const respons: Tarifa = await getFind(id);
@@ -209,7 +249,7 @@ const CardTable = () => {
         data={dataJson}
         columns={columns}
         options={{
-          paging: false, // Desactivamos la paginación interna de DataTables
+          paging: true, // Desactivamos la paginación interna de DataTables
           info: false,   // Ocultamos la info interna para usar la nuestra
           order: [[1, 'asc']],
           responsive: true,
@@ -232,6 +272,13 @@ const CardTable = () => {
             zeroRecords: "No se encontraron resultados",
             emptyTable: "Ningún dato disponible en esta tabla"
           },
+
+          lengthChange: true, // Activa el selector nativo
+          lengthMenu: [5, 10, 25, 50, 100], // Opciones del select
+          dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" + // 'l' es el selector, 'f' es el buscador
+              "<'row'<'col-sm-12'tr>>",
+
+          
         }}
         className="table table-striped dt-responsive dt-select-checkbox align-middle mb-0">
         <thead className="thead-sm text-uppercase fs-xxs text-center">
@@ -248,27 +295,55 @@ const CardTable = () => {
         <div>
           Mostrando página {currentPage} de {lastPage} (Total: {totalRecords} registros)
         </div>
-        <div className="btn-group">
-          <Button 
-            variant="outline-primary" 
-            size="sm" 
+
+        <Pagination className="pagination-boxed pagination-secondary">    
+          <Pagination.First 
+            onClick={goToFirstPage} 
+            disabled={currentPage === 1}
+          >
+            <TbChevronsLeft />
+          </Pagination.First>
+          <Pagination.First 
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
           >
-            <TbChevronLeft className="fs-lg" />
-            {/* Anterior */}
-          </Button>
-          <Button 
-            variant="outline-primary" 
-            size="sm" 
+            <TbChevronLeft />
+          </Pagination.First>
+            {links.map((link, index) => {
+              if (link.label.includes("Next") || link.label.includes("Prev")) return null;
+
+              return (
+                <Pagination.Item
+                  active={link.active}
+                  key={index}
+                  onClick={() => {
+                    // Extraemos el número de página de la URL o del label
+                    const pageNumber = parseInt(link.label);
+                    if (pageNumber) setCurrentPage(pageNumber);
+                  }}
+                  
+                >
+                  {link.label.replace('&laquo; ', '').replace(' &raquo;', '')}
+                </Pagination.Item>
+                
+              );
+            })}
+          {/* ---- */}
+          <Pagination.Next 
             disabled={currentPage === lastPage}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
-            <TbChevronRight className="fs-lg" />
-            {/* Siguiente */}
-          </Button>
-        </div>
+            <TbChevronRight />
+          </Pagination.Next>
+          <Pagination.Last 
+            onClick={goToLastPage} 
+            disabled={currentPage === lastPage}
+          >
+            <TbChevronsRight />
+          </Pagination.Last>
+        </Pagination>
       </div>
+      
 
       <Modal
         className="fade"
